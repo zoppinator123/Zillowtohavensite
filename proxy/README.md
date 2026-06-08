@@ -70,8 +70,22 @@ are narrowed to Sevierville / Gatlinburg / Pigeon Forge, $700K+.
 
 ---
 
-## Prefer Vercel/Netlify instead of Cloudflare?
+## Prefer Vercel instead of Cloudflare?
 
-The same logic works as a serverless function (`/api/listings`). The auth
-handling is identical — just read the same variable names from
-`process.env`. Ask and I'll generate that version.
+Already included: **[`/api/listings.js`](../api/listings.js)** is the same proxy
+as a Vercel serverless function.
+
+1. Import this repo at <https://vercel.com> (Add New → Project). Vercel
+   auto-detects `/api/listings.js` — no build settings needed.
+2. Project → **Settings → Environment Variables**: add the **same variables**
+   listed in the table above (`UPSTREAM_URL`, `ALLOWED_ORIGIN`, `AUTH_MODE`,
+   `AUTH_TOKEN`, etc.), then **Redeploy**.
+3. Your endpoint is `https://<your-project>.vercel.app/api/listings`.
+4. In `index.html` set:
+   ```js
+   dataSource: 'custom',
+   customFeedUrl: 'https://<your-project>.vercel.app/api/listings',
+   ```
+
+Use **either** the Cloudflare Worker **or** the Vercel function — not both.
+Netlify works the same way (functions read the identical `process.env` names).
