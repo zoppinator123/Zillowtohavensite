@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Smoky Mountain STR Investment Listings | Haven Vacation Rentals</title>
+<meta name="description" content="New short-term rental investment properties for sale in Sevierville, Gatlinburg, and Pigeon Forge, TN — $700K+. Synced live. Connect with Haven and we'll introduce you to the listing agent." />
+
+<!-- ===================================================================
+     HAVEN VACATION RENTALS — STR INVESTMENT LISTINGS PAGE
+     Self-contained static page. Drop into a WordPress "Custom HTML"
+     block / full-width page, or host anywhere.
+
+     >>> EDIT THE CONFIG BLOCK INSIDE <script> AT THE BOTTOM <<<
+     That's where you set the MLS/IDX feed and lead-email delivery.
+=================================================================== -->
+
+<style>
+  :root {
+    --coral: #FF5E5B;
+    --coral-dark: #e84b48;
+    --heading: #1F1F1F;
+    --body: #333333;
+    --bg: #FAFAFA;
+    --section: #F5F5F5;
+    --footer: #1A1A1A;
+    --line: #e7e7e7;
+    --card-shadow: 0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06);
+    --radius: 14px;
+    --maxw: 1200px;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: var(--font);
+    color: var(--body);
+    background: var(--bg);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3 { color: var(--heading); line-height: 1.15; margin: 0 0 .4em; }
+  h1 { font-size: clamp(2rem, 5vw, 3.25rem); font-weight: 800; letter-spacing: -.02em; }
+  h2 { font-size: clamp(1.5rem, 3vw, 2.1rem); font-weight: 800; letter-spacing: -.01em; }
+  h3 { font-size: 1.15rem; font-weight: 700; }
+  p  { margin: 0 0 1em; }
+  a  { color: inherit; }
+  img { display: block; max-width: 100%; }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: .5em;
+    background: var(--coral); color: #fff; border: none; cursor: pointer;
+    font-family: inherit; font-weight: 700; font-size: 1rem;
+    padding: 14px 26px; border-radius: 999px; text-decoration: none;
+    transition: background .15s ease, transform .05s ease;
+    line-height: 1;
+  }
+  .btn:hover { background: var(--coral-dark); }
+  .btn:active { transform: translateY(1px); }
+  .btn--block { width: 100%; }
+  .btn--ghost {
+    background: transparent; color: var(--heading);
+    border: 1.5px solid var(--line);
+  }
+  .btn--ghost:hover { background: #fff; border-color: #ccc; }
+
+  /* ---------- Header ---------- */
+  header.site {
+    background: #fff; border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; z-index: 40;
+  }
+  header.site .wrap {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 72px;
+  }
+  header.site img.logo { height: 48px; width: auto; }
+  header.site .brandwordmark { font-weight: 800; letter-spacing: .08em; color: var(--heading); font-size: 1.05rem; }
+  header.site .header-cta { font-size: .92rem; padding: 11px 20px; }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative;
+    background:
+      linear-gradient(180deg, rgba(20,20,20,.55), rgba(20,20,20,.65)),
+      url('https://images.unsplash.com/photo-1449158743715-0a90ebb6d2d8?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+    color: #fff;
+    padding: 84px 0 92px;
+  }
+  .hero h1 { color: #fff; max-width: 16ch; }
+  .hero p.lede { font-size: clamp(1.05rem, 2vw, 1.3rem); max-width: 62ch; color: rgba(255,255,255,.92); }
+  .hero .pill {
+    display: inline-block; background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.3); backdrop-filter: blur(4px);
+    color: #fff; font-weight: 600; font-size: .85rem; letter-spacing: .03em;
+    padding: 7px 16px; border-radius: 999px; margin-bottom: 22px;
+    text-transform: uppercase;
+  }
+  .hero .hero-cta { margin-top: 30px; display: flex; gap: 14px; flex-wrap: wrap; }
+  .hero .trust {
+    margin-top: 34px; display: flex; gap: 28px; flex-wrap: wrap;
+    color: rgba(255,255,255,.9); font-size: .95rem;
+  }
+  .hero .trust b { color: #fff; font-size: 1.35rem; font-weight: 800; display:block; }
+
+  /* ---------- Controls / filter bar ---------- */
+  .controls { background: var(--section); border-bottom: 1px solid var(--line); padding: 22px 0; }
+  .controls .wrap { display: flex; flex-wrap: wrap; gap: 18px 28px; align-items: flex-end; }
+  .ctrl { display: flex; flex-direction: column; gap: 7px; }
+  .ctrl label { font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #777; }
+  .chip-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1.5px solid var(--line); background: #fff; color: var(--body);
+    padding: 9px 15px; border-radius: 999px; cursor: pointer; font-size: .9rem; font-weight: 600;
+    user-select: none; transition: all .12s ease;
+  }
+  .chip[aria-pressed="true"] { background: var(--heading); color: #fff; border-color: var(--heading); }
+  .ctrl select {
+    font-family: inherit; font-size: .95rem; padding: 11px 14px; border-radius: 10px;
+    border: 1.5px solid var(--line); background: #fff; color: var(--body); min-width: 170px;
+  }
+  .controls .spacer { flex: 1 1 auto; }
+  .sync {
+    display: flex; align-items: center; gap: 9px; font-size: .85rem; color: #777;
+    white-space: nowrap;
+  }
+  .sync .dot {
+    width: 9px; height: 9px; border-radius: 50%; background: #38b000;
+    box-shadow: 0 0 0 0 rgba(56,176,0,.5); animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(56,176,0,.5); }
+    70% { box-shadow: 0 0 0 8px rgba(56,176,0,0); }
+    100% { box-shadow: 0 0 0 0 rgba(56,176,0,0); }
+  }
+
+  /* ---------- Listings grid ---------- */
+  .listings-section { padding: 48px 0 72px; }
+  .listings-head { display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom: 26px; }
+  .listings-head .count { color:#777; font-size: .98rem; }
+  .grid {
+    display: grid; gap: 26px;
+    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  }
+  .card {
+    background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
+    overflow: hidden; box-shadow: var(--card-shadow); display: flex; flex-direction: column;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 10px 34px rgba(0,0,0,.12); }
+  .card .photo { position: relative; aspect-ratio: 3/2; background: #ececec; overflow: hidden; }
+  .card .photo img { width: 100%; height: 100%; object-fit: cover; }
+  .card .badges { position: absolute; top: 12px; left: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .badge {
+    font-size: .72rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
+    padding: 6px 11px; border-radius: 999px; color: #fff; background: rgba(31,31,31,.82);
+    backdrop-filter: blur(3px);
+  }
+  .badge--str { background: var(--coral); }
+  .badge--new { background: #2d7a2d; }
+  .card .body { padding: 18px 18px 20px; display: flex; flex-direction: column; flex: 1; }
+  .card .price { font-size: 1.5rem; font-weight: 800; color: var(--heading); letter-spacing: -.01em; }
+  .card .addr { color: var(--body); font-size: .95rem; margin: 2px 0 0; }
+  .card .city { color: #888; font-size: .85rem; text-transform: uppercase; letter-spacing: .04em; font-weight:600; }
+  .card .specs {
+    display: flex; gap: 16px; flex-wrap: wrap; margin: 14px 0 4px;
+    font-size: .9rem; color: var(--body); border-top: 1px solid var(--line); padding-top: 14px;
+  }
+  .card .specs span b { color: var(--heading); }
+  .card .revenue {
+    margin-top: 12px; background: var(--section); border-radius: 10px; padding: 10px 13px;
+    font-size: .85rem; color: var(--body);
+  }
+  .card .revenue b { color: var(--heading); }
+  .card .agent { margin-top: 12px; font-size: .8rem; color: #999; }
+  .card .actions { margin-top: 16px; display: flex; gap: 10px; }
+  .card .actions .btn { padding: 12px 18px; font-size: .92rem; flex: 1; }
+
+  .empty { text-align:center; padding: 60px 20px; color:#888; }
+  .empty h3 { color:#555; }
+
+  .skeleton { animation: shimmer 1.4s infinite linear; background: linear-gradient(90deg,#eee 0%,#f6f6f6 50%,#eee 100%); background-size: 200% 100%; }
+  @keyframes shimmer { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+
+  /* ---------- How it works ---------- */
+  .how { background: var(--section); padding: 60px 0; }
+  .how .steps { display: grid; gap: 26px; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); margin-top: 30px; }
+  .how .step { background:#fff; border:1px solid var(--line); border-radius: var(--radius); padding: 26px; }
+  .how .step .num {
+    width: 40px; height: 40px; border-radius: 50%; background: var(--coral); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-weight:800; margin-bottom: 14px;
+  }
+
+  /* ---------- Modal ---------- */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(20,20,20,.6); z-index: 100;
+    display: none; align-items: flex-start; justify-content: center; padding: 30px 16px; overflow-y: auto;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background:#fff; border-radius: 16px; max-width: 920px; width: 100%;
+    box-shadow: 0 24px 60px rgba(0,0,0,.3); overflow: hidden;
+    display: grid; grid-template-columns: 1fr 1fr; animation: popin .2s ease;
+  }
+  @keyframes popin { from { opacity:0; transform: translateY(12px);} to {opacity:1; transform:none;} }
+  .modal .m-photo { background:#ececec; min-height: 280px; position: relative; }
+  .modal .m-photo img { width:100%; height:100%; object-fit: cover; position:absolute; inset:0; }
+  .modal .m-photo .m-price {
+    position:absolute; bottom:0; left:0; right:0; padding: 30px 22px 16px; color:#fff;
+    background: linear-gradient(0deg, rgba(0,0,0,.7), transparent); font-size:1.5rem; font-weight:800;
+  }
+  .modal .m-body { padding: 28px 28px 30px; }
+  .modal .m-close {
+    position:absolute; top:14px; right:14px; z-index:2; background:rgba(255,255,255,.9);
+    border:none; width:36px; height:36px; border-radius:50%; cursor:pointer; font-size:1.3rem; line-height:1;
+    color:#333; display:flex; align-items:center; justify-content:center;
+  }
+  .modal .m-prop { font-size: .85rem; color:#888; margin-bottom: 4px; }
+  .modal .m-specs { display:flex; gap:16px; flex-wrap:wrap; font-size:.88rem; color:var(--body); margin: 8px 0 18px; }
+  .modal form { display:flex; flex-direction:column; gap: 12px; }
+  .modal .field { display:flex; flex-direction:column; gap:5px; }
+  .modal .field label { font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:#777; }
+  .modal input, .modal textarea {
+    font-family:inherit; font-size:.98rem; padding: 12px 14px; border:1.5px solid var(--line);
+    border-radius:10px; background:#fff; color:var(--body); width:100%;
+  }
+  .modal input:focus, .modal textarea:focus { outline:none; border-color: var(--coral); }
+  .modal textarea { resize: vertical; min-height: 76px; }
+  .modal .fineprint { font-size:.78rem; color:#999; margin: 2px 0 0; }
+  .form-status { font-size:.92rem; padding: 12px 14px; border-radius:10px; display:none; }
+  .form-status.show { display:block; }
+  .form-status.success { background:#eaf7ea; color:#2d7a2d; border:1px solid #cce8cc; }
+  .form-status.error { background:#fdecec; color:#c0392b; border:1px solid #f5cccc; }
+
+  /* ---------- Footer ---------- */
+  footer.site { background: var(--footer); color: rgba(255,255,255,.72); padding: 50px 0 40px; margin-top: 0; }
+  footer.site h3 { color:#fff; }
+  footer.site a { color: rgba(255,255,255,.8); text-decoration: none; }
+  footer.site a:hover { color:#fff; text-decoration: underline; }
+  footer.site .ftop { display:flex; justify-content:space-between; gap:30px; flex-wrap:wrap; }
+  footer.site .fnote { margin-top: 34px; padding-top: 22px; border-top:1px solid rgba(255,255,255,.12); font-size:.8rem; color: rgba(255,255,255,.5); }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 760px) {
+    .modal { grid-template-columns: 1fr; }
+    .modal .m-photo { min-height: 200px; }
+    header.site .header-cta { display:none; }
+    .controls .sync { width:100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= HEADER ================= -->
+<header class="site">
+  <div class="wrap">
+    <a href="https://havenvacationrentals.com" style="display:flex;align-items:center;gap:12px;text-decoration:none;">
+      <img class="logo" src="https://havenvacationrentals.com/wp-content/uploads/2023/07/Haven-Logo-Black-Transparent-4.png" alt="Haven Vacation Rentals" onerror="this.style.display='none';this.nextElementSibling.style.display='inline';" />
+      <span class="brandwordmark" style="display:none;">HAVEN VACATION RENTALS</span>
+    </a>
+    <a href="#listings" class="btn header-cta">Browse Listings</a>
+  </div>
+</header>
+
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <div class="wrap">
+    <span class="pill">Smoky Mountain STR Investments</span>
+    <h1>New Short-Term Rental Properties Hitting the Market</h1>
+    <p class="lede">Fresh $700K+ investment cabins in Sevierville, Gatlinburg, and Pigeon Forge — synced live as they list. Find one you love and we'll personally connect you with the listing agent and walk you through the rental numbers.</p>
+    <div class="hero-cta">
+      <a href="#listings" class="btn">View Live Listings</a>
+      <a href="#how" class="btn btn--ghost" style="color:#fff;border-color:rgba(255,255,255,.5);">How It Works</a>
+    </div>
+    <div class="trust">
+      <div><b id="heroCount">—</b> Active listings</div>
+      <div><b>$700K+</b> Investment grade</div>
+      <div><b>Superhost</b> managed by Haven</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CONTROLS ================= -->
+<section class="controls" id="listings">
+  <div class="wrap">
+    <div class="ctrl">
+      <label>Area</label>
+      <div class="chip-row" id="cityChips">
+        <button class="chip" data-city="Sevierville" aria-pressed="true">Sevierville</button>
+        <button class="chip" data-city="Gatlinburg" aria-pressed="true">Gatlinburg</button>
+        <button class="chip" data-city="Pigeon Forge" aria-pressed="true">Pigeon Forge</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label for="minPrice">Min Price</label>
+      <select id="minPrice">
+        <option value="700000" selected>$700K+</option>
+        <option value="1000000">$1M+</option>
+        <option value="1500000">$1.5M+</option>
+        <option value="2000000">$2M+</option>
+      </select>
+    </div>
+    <div class="ctrl">
+      <label for="bedsFilter">Bedrooms</label>
+      <select id="bedsFilter">
+        <option value="0" selected>Any</option>
+        <option value="3">3+</option>
+        <option value="4">4+</option>
+        <option value="5">5+</option>
+        <option value="6">6+</option>
+      </select>
+    </div>
+    <div class="ctrl">
+      <label for="sortBy">Sort</label>
+      <select id="sortBy">
+        <option value="newest" selected>Newest first</option>
+        <option value="price-desc">Price: High to Low</option>
+        <option value="price-asc">Price: Low to High</option>
+        <option value="beds-desc">Most bedrooms</option>
+      </select>
+    </div>
+    <div class="spacer"></div>
+    <div class="sync">
+      <span class="dot"></span>
+      <span id="syncText">Syncing live…</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= LISTINGS ================= -->
+<section class="listings-section">
+  <div class="wrap">
+    <div class="listings-head">
+      <h2>Available Investment Cabins</h2>
+      <div class="count" id="resultCount"></div>
+    </div>
+    <div class="grid" id="grid"><!-- cards injected --></div>
+    <div class="empty" id="empty" style="display:none;">
+      <h3>No listings match your filters right now</h3>
+      <p>Try widening your price range or selecting more areas. New properties sync in automatically — check back soon.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= HOW IT WORKS ================= -->
+<section class="how" id="how">
+  <div class="wrap">
+    <h2>How It Works</h2>
+    <p style="max-width:60ch;">We surface brand-new STR-ready listings the moment they hit the market — then make the rest easy.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="num">1</div>
+        <h3>Browse fresh listings</h3>
+        <p>Investment cabins $700K+ in Sevierville, Gatlinburg & Pigeon Forge, synced live from the MLS.</p>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <h3>Tell us which you like</h3>
+        <p>Submit your interest on any property. No pressure, no obligation — just a quick form.</p>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <h3>We connect you</h3>
+        <p>We introduce you directly to the listing agent and share realistic short-term rental projections.</p>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <h3>We run it for you</h3>
+        <p>Buy it, and Haven manages it as a Superhost property — making your passive income truly passive.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MODAL ================= -->
+<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="m-title">
+  <div class="modal">
+    <button class="m-close" id="modalClose" aria-label="Close">&times;</button>
+    <div class="m-photo">
+      <img id="m-img" src="" alt="" />
+      <div class="m-price" id="m-price"></div>
+    </div>
+    <div class="m-body">
+      <div class="m-prop" id="m-prop"></div>
+      <h3 id="m-title" style="margin-bottom:2px;">Connect with us about this property</h3>
+      <div class="m-specs" id="m-specs"></div>
+      <form id="leadForm" novalidate>
+        <div class="field">
+          <label for="lf-name">Your Name</label>
+          <input type="text" id="lf-name" name="name" required autocomplete="name" />
+        </div>
+        <div class="field">
+          <label for="lf-email">Email</label>
+          <input type="email" id="lf-email" name="email" required autocomplete="email" />
+        </div>
+        <div class="field">
+          <label for="lf-phone">Phone</label>
+          <input type="tel" id="lf-phone" name="phone" autocomplete="tel" />
+        </div>
+        <div class="field">
+          <label for="lf-msg">Message <span style="font-weight:400;text-transform:none;color:#aaa;">(optional)</span></label>
+          <textarea id="lf-msg" name="message" placeholder="I'd love to learn more about the rental numbers on this property…"></textarea>
+        </div>
+        <div class="form-status" id="formStatus"></div>
+        <button type="submit" class="btn btn--block" id="lf-submit">Connect Me With the Agent</button>
+        <p class="fineprint">By submitting, you agree that Haven Vacation Rentals may contact you about this and similar properties. We'll never share your info.</p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ================= FOOTER ================= -->
+<footer class="site">
+  <div class="wrap">
+    <div class="ftop">
+      <div style="max-width:34ch;">
+        <h3 style="letter-spacing:.08em;">HAVEN VACATION RENTALS</h3>
+        <p>Hassle-free short-term rental management in the Smoky Mountains. Run it like we own it. Make passive income more passive.</p>
+      </div>
+      <div>
+        <h3>Explore</h3>
+        <p><a href="#listings">Live Listings</a><br/>
+        <a href="#how">How It Works</a><br/>
+        <a href="https://havenvacationrentals.com">Main Site</a></p>
+      </div>
+      <div>
+        <h3>Get In Touch</h3>
+        <p><a href="mailto:sales@havenvacationrentals.com">sales@havenvacationrentals.com</a><br/>
+        Sevierville · Gatlinburg · Pigeon Forge, TN</p>
+      </div>
+    </div>
+    <div class="fnote">
+      © <span id="year"></span> Haven Vacation Rentals. Listing data is provided for informational purposes and is deemed reliable but not guaranteed. Haven Vacation Rentals is not the listing brokerage; we connect interested buyers with the listing agent.
+    </div>
+  </div>
+</footer>
+
+<script>
+/* =====================================================================
+   ███  CONFIG — EDIT THIS BLOCK  ███
+   ===================================================================== */
+const CONFIG = {
+
+  /* --- 1. WHERE LISTINGS COME FROM --------------------------------
+     dataSource options:
+       'sample'      → built-in Smoky Mountain demo listings (default,
+                       so the page looks right with zero setup).
+       'simplyrets'  → live MLS/IDX via SimplyRETS-style REST API
+                       (RESO). Works with SimplyRETS and most TN IDX
+                       resellers. Set credentials below.
+       'custom'      → fetch a JSON URL you control (e.g. your own
+                       IDX-to-JSON proxy). Set customFeedUrl below.
+     ----------------------------------------------------------------- */
+  dataSource: 'sample',
+
+  // --- SimplyRETS / RESO IDX settings (used when dataSource==='simplyrets')
+  // NOTE: For production, proxy this through a tiny serverless function so
+  // your API key is never exposed in the browser. The demo creds below are
+  // SimplyRETS' public sandbox (Texas data) and are safe to ship as a demo.
+  simplyrets: {
+    baseUrl: 'https://api.simplyrets.com/properties',
+    username: 'simplyrets',   // <-- replace with your IDX/SimplyRETS key
+    password: 'simplyrets',   // <-- replace with your IDX/SimplyRETS secret
+    // Extra query params sent to the API (server-side filtering when supported):
+    params: { type: 'residential', status: 'Active', limit: 50 }
+  },
+
+  // --- Custom JSON feed (used when dataSource==='custom')
+  customFeedUrl: '',
+
+  /* --- 2. LISTING FILTERS (also enforced client-side) -------------- */
+  cities: ['Sevierville', 'Gatlinburg', 'Pigeon Forge'],
+  minPrice: 700000,
+
+  /* --- 3. LIVE SYNC -------------------------------------------------- */
+  syncIntervalMs: 5 * 60 * 1000,   // re-poll the feed every 5 minutes
+
+  /* --- 4. LEAD DELIVERY → sales@havenvacationrentals.com -----------
+     leadMode options:
+       'web3forms' → seamless in-page submit, no backend. Create a free
+                     access key at https://web3forms.com (point it at
+                     sales@havenvacationrentals.com) and paste it below.
+       'mailto'    → opens the visitor's email app pre-filled to
+                     sales@. Works with zero setup (default fallback).
+     ----------------------------------------------------------------- */
+  leadMode: 'mailto',
+  leadEmail: 'sales@havenvacationrentals.com',
+  web3formsKey: '',   // <-- paste your Web3Forms access key, then set leadMode:'web3forms'
+};
+
+/* =====================================================================
+   Built-in Smoky Mountain sample listings (used when dataSource==='sample').
+   Replace by switching dataSource to 'simplyrets' or 'custom'.
+   ===================================================================== */
+const SAMPLE_LISTINGS = [
+  {
+    id: 'HVR-1001', mlsId: '1287445', price: 1249000,
+    address: '3421 Black Bear Ridge Rd', city: 'Gatlinburg', state: 'TN', zip: '37738',
+    beds: 5, baths: 5.5, sqft: 4200, type: 'Cabin', listDate: daysAgo(2),
+    photo: unsplash('1449158743715-0a90ebb6d2d8'),
+    estRevenue: 168000,
+    description: 'Luxury 5BR mountain-view lodge with game room, theater, and hot tub. Turnkey STR with strong rental history minutes from downtown Gatlinburg.',
+    agentName: 'Listing Agent', brokerage: 'Smoky Mountain Realty'
+  },
+  {
+    id: 'HVR-1002', mlsId: '1291002', price: 879900,
+    address: '128 Highland Overlook Way', city: 'Pigeon Forge', state: 'TN', zip: '37863',
+    beds: 4, baths: 4, sqft: 3100, type: 'Cabin', listDate: daysAgo(1),
+    photo: unsplash('1480796927426-f609979314bd'),
+    estRevenue: 121000,
+    description: 'Modern 4BR cabin walking distance to the Parkway. Open-concept great room, two king suites, and a wraparound deck with mountain views.',
+    agentName: 'Listing Agent', brokerage: 'Parkway Properties'
+  },
+  {
+    id: 'HVR-1003', mlsId: '1288771', price: 2395000,
+    address: '910 Eagle Summit Dr', city: 'Sevierville', state: 'TN', zip: '37862',
+    beds: 8, baths: 8.5, sqft: 6800, type: 'Cabin', listDate: daysAgo(4),
+    photo: unsplash('1518780664697-55e3ad937233'),
+    estRevenue: 312000,
+    description: 'Premier 8BR group-getaway estate with indoor pool, arcade, and panoramic ridge-top views. Built for high-occupancy short-term rental income.',
+    agentName: 'Listing Agent', brokerage: 'Summit Luxury Group'
+  },
+  {
+    id: 'HVR-1004', mlsId: '1290115', price: 745000,
+    address: '562 Laurel Creek Loop', city: 'Sevierville', state: 'TN', zip: '37876',
+    beds: 3, baths: 3, sqft: 2400, type: 'Cabin', listDate: daysAgo(3),
+    photo: unsplash('1416331108676-a22ccb276e35'),
+    estRevenue: 98000,
+    description: 'Cozy yet upscale 3BR creekside cabin with stone fireplace, hot tub, and easy access to Pigeon Forge attractions. A strong entry-level STR play.',
+    agentName: 'Listing Agent', brokerage: 'Creekside Realty'
+  },
+  {
+    id: 'HVR-1005', mlsId: '1289940', price: 1575000,
+    address: '77 Wears Valley Vista', city: 'Pigeon Forge', state: 'TN', zip: '37863',
+    beds: 6, baths: 6, sqft: 5100, type: 'Cabin', listDate: daysAgo(5),
+    photo: unsplash('1512917774080-9991f1c4c750'),
+    estRevenue: 214000,
+    description: 'Stunning 6BR Wears Valley retreat with floor-to-ceiling windows, heated pool, and unobstructed Smoky Mountain views. Established rental performer.',
+    agentName: 'Listing Agent', brokerage: 'Wears Valley Real Estate'
+  },
+  {
+    id: 'HVR-1006', mlsId: '1292210', price: 989000,
+    address: '244 Misty Hollow Trail', city: 'Gatlinburg', state: 'TN', zip: '37738',
+    beds: 4, baths: 4.5, sqft: 3450, type: 'Cabin', listDate: daysAgo(1),
+    photo: unsplash('1597211833712-5e41faa202ea'),
+    estRevenue: 139000,
+    description: 'Secluded 4BR luxury cabin with private hot tub, theater room, and a chef-style kitchen — yet only 10 minutes to downtown Gatlinburg.',
+    agentName: 'Listing Agent', brokerage: 'Misty Mountain Realty'
+  },
+  {
+    id: 'HVR-1007', mlsId: '1287990', price: 1129000,
+    address: '1850 Pinnacle View Ct', city: 'Sevierville', state: 'TN', zip: '37862',
+    beds: 5, baths: 5, sqft: 3900, type: 'Cabin', listDate: daysAgo(6),
+    photo: unsplash('1564013799919-ab600027ffc6'),
+    estRevenue: 156000,
+    description: 'Newly built 5BR cabin perched for sunset views, featuring bunk room, game loft, and dual hot tubs. Designed from the ground up for STR revenue.',
+    agentName: 'Listing Agent', brokerage: 'Pinnacle Properties'
+  },
+  {
+    id: 'HVR-1008', mlsId: '1291777', price: 825000,
+    address: '39 Dollywood Lane', city: 'Pigeon Forge', state: 'TN', zip: '37863',
+    beds: 4, baths: 3.5, sqft: 2850, type: 'Cabin', listDate: daysAgo(2),
+    photo: unsplash('1502672260266-1c1ef2d93688'),
+    estRevenue: 118000,
+    description: 'Family-favorite 4BR cabin minutes from Dollywood with arcade, theater, and resort pool access. Consistently high occupancy year-round.',
+    agentName: 'Listing Agent', brokerage: 'Smoky Vacation Homes'
+  },
+  {
+    id: 'HVR-1009', mlsId: '1290450', price: 1899000,
+    address: '655 Chalet Village Blvd', city: 'Gatlinburg', state: 'TN', zip: '37738',
+    beds: 7, baths: 7, sqft: 5600, type: 'Cabin', listDate: daysAgo(7),
+    photo: unsplash('1505691938895-1758d7feb511'),
+    estRevenue: 268000,
+    description: 'Grand 7BR Chalet Village lodge with two living areas, indoor pool, and elevator. Built for large groups and premium nightly rates.',
+    agentName: 'Listing Agent', brokerage: 'Chalet Village Realty'
+  }
+];
+
+/* =====================================================================
+   App logic
+   ===================================================================== */
+function unsplash(id){ return 'https://images.unsplash.com/photo-' + id + '?auto=format&fit=crop&w=800&q=80'; }
+function daysAgo(d){ const t = new Date(); t.setDate(t.getDate() - d); return t.toISOString(); }
+
+const state = {
+  all: [],
+  activeCities: new Set(CONFIG.cities),
+  minPrice: CONFIG.minPrice,
+  minBeds: 0,
+  sort: 'newest',
+  current: null
+};
+
+const fmtPrice = n => '$' + Number(n).toLocaleString('en-US');
+const fmtPriceShort = n => {
+  n = Number(n);
+  if (n >= 1000000) return '$' + (n/1000000).toFixed(n % 1000000 === 0 ? 0 : 2).replace(/\.?0+$/,'') + 'M';
+  return '$' + Math.round(n/1000) + 'K';
+};
+
+/* ---- Normalize a SimplyRETS/RESO record into our unified shape ---- */
+function normalizeSimplyRets(r){
+  const addr = r.address || {};
+  const prop = r.property || {};
+  const agent = (r.agent || {});
+  const office = (r.office || {});
+  const baths = (prop.bathsFull || 0) + 0.5 * (prop.bathsHalf || 0);
+  return {
+    id: r.listingId || r.mlsId || (addr.full || Math.random().toString(36).slice(2)),
+    mlsId: r.mlsId || r.listingId || '',
+    price: r.listPrice || 0,
+    address: addr.streetName ? (addr.full || [addr.streetNumberText, addr.streetName].filter(Boolean).join(' ')) : (addr.full || ''),
+    city: addr.city || '',
+    state: addr.state || '',
+    zip: addr.postalCode || '',
+    beds: prop.bedrooms || 0,
+    baths: baths || prop.bathsTotal || 0,
+    sqft: prop.area || 0,
+    type: prop.type || prop.subTypeText || 'Residential',
+    listDate: r.listDate || r.modified || new Date().toISOString(),
+    photo: (r.photos && r.photos[0]) || '',
+    photos: r.photos || [],
+    estRevenue: null,
+    description: r.remarks || '',
+    agentName: [agent.firstName, agent.lastName].filter(Boolean).join(' ') || 'Listing Agent',
+    brokerage: office.name || ''
+  };
+}
+
+/* ---- Fetch listings from the configured source ---- */
+async function fetchListings(){
+  if (CONFIG.dataSource === 'sample') {
+    return SAMPLE_LISTINGS.slice();
+  }
+  if (CONFIG.dataSource === 'simplyrets') {
+    const c = CONFIG.simplyrets;
+    const qs = new URLSearchParams(c.params || {});
+    // Request the target cities at the API level where supported:
+    CONFIG.cities.forEach(city => qs.append('cities', city));
+    const url = c.baseUrl + '?' + qs.toString();
+    const res = await fetch(url, {
+      headers: { 'Authorization': 'Basic ' + btoa(c.username + ':' + c.password) }
+    });
+    if (!res.ok) throw new Error('Feed error ' + res.status);
+    const data = await res.json();
+    return (Array.isArray(data) ? data : []).map(normalizeSimplyRets);
+  }
+  if (CONFIG.dataSource === 'custom') {
+    if (!CONFIG.customFeedUrl) throw new Error('customFeedUrl not set');
+    const res = await fetch(CONFIG.customFeedUrl);
+    if (!res.ok) throw new Error('Feed error ' + res.status);
+    const data = await res.json();
+    const arr = Array.isArray(data) ? data : (data.listings || data.results || []);
+    // Heuristic: if records look like SimplyRETS, normalize; else assume unified shape.
+    return arr.map(x => (x.property || x.listPrice) ? normalizeSimplyRets(x) : x);
+  }
+  return [];
+}
+
+/* ---- Filtering + sorting ---- */
+function visibleListings(){
+  let list = state.all.filter(l =>
+    l.price >= state.minPrice &&
+    l.beds >= state.minBeds &&
+    matchesCity(l.city)
+  );
+  switch (state.sort) {
+    case 'price-desc': list.sort((a,b)=>b.price-a.price); break;
+    case 'price-asc':  list.sort((a,b)=>a.price-b.price); break;
+    case 'beds-desc':  list.sort((a,b)=>b.beds-a.beds); break;
+    default:           list.sort((a,b)=> new Date(b.listDate) - new Date(a.listDate));
+  }
+  return list;
+}
+function matchesCity(city){
+  if (state.activeCities.size === 0) return false;
+  const c = (city || '').toLowerCase();
+  for (const ac of state.activeCities) if (c.includes(ac.toLowerCase())) return true;
+  return false;
+}
+
+function isNew(listDate){
+  const days = (Date.now() - new Date(listDate)) / 86400000;
+  return days <= 3;
+}
+
+/* ---- Rendering ---- */
+function render(){
+  const grid = document.getElementById('grid');
+  const list = visibleListings();
+  document.getElementById('resultCount').textContent =
+    list.length + (list.length === 1 ? ' property' : ' properties');
+  document.getElementById('heroCount').textContent = state.all.filter(l=>l.price>=CONFIG.minPrice).length || list.length;
+  document.getElementById('empty').style.display = list.length ? 'none' : 'block';
+
+  grid.innerHTML = list.map(l => `
+    <article class="card">
+      <div class="photo">
+        <div class="badges">
+          ${isNew(l.listDate) ? '<span class="badge badge--new">New</span>' : ''}
+          <span class="badge badge--str">STR Ready</span>
+        </div>
+        <img loading="lazy" src="${l.photo || ''}" alt="${escapeHtml(l.address)}"
+             onerror="this.style.background='#ddd';this.removeAttribute('src');" />
+      </div>
+      <div class="body">
+        <div class="price">${fmtPrice(l.price)}</div>
+        <div class="addr">${escapeHtml(l.address)}</div>
+        <div class="city">${escapeHtml(l.city)}, ${escapeHtml(l.state || 'TN')}</div>
+        <div class="specs">
+          <span><b>${l.beds || '—'}</b> bd</span>
+          <span><b>${formatBaths(l.baths)}</b> ba</span>
+          <span><b>${l.sqft ? Number(l.sqft).toLocaleString() : '—'}</b> sqft</span>
+        </div>
+        ${l.estRevenue ? `<div class="revenue">Est. annual STR revenue: <b>${fmtPrice(l.estRevenue)}</b></div>` : ''}
+        ${l.brokerage ? `<div class="agent">Listed by ${escapeHtml(l.brokerage)}</div>` : ''}
+        <div class="actions">
+          <button class="btn" data-connect="${escapeAttr(l.id)}">Connect With Us</button>
+        </div>
+      </div>
+    </article>
+  `).join('');
+
+  grid.querySelectorAll('[data-connect]').forEach(btn => {
+    btn.addEventListener('click', () => openModal(btn.getAttribute('data-connect')));
+  });
+}
+
+function formatBaths(b){ if(!b) return '—'; return Number.isInteger(b) ? b : b.toFixed(1); }
+function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function escapeAttr(s){ return escapeHtml(s); }
+
+/* ---- Live sync ---- */
+function setSyncStatus(text){ document.getElementById('syncText').textContent = text; }
+async function sync(initial){
+  if (initial) {
+    document.getElementById('grid').innerHTML = Array.from({length:6}).map(()=>(
+      '<article class="card"><div class="photo skeleton"></div><div class="body">'+
+      '<div class="price skeleton" style="height:24px;width:50%;border-radius:6px;"></div>'+
+      '<div class="addr skeleton" style="height:14px;width:80%;margin-top:10px;border-radius:6px;"></div>'+
+      '</div></article>'
+    )).join('');
+  }
+  try {
+    setSyncStatus('Syncing live…');
+    const listings = await fetchListings();
+    state.all = listings;
+    render();
+    const t = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    setSyncStatus('Synced live · updated ' + t);
+  } catch (err) {
+    console.error('[Haven] listing sync failed:', err);
+    if (state.all.length === 0) {
+      // Fall back to sample data so the page is never empty.
+      state.all = SAMPLE_LISTINGS.slice();
+      render();
+    }
+    setSyncStatus('Showing recent listings');
+  }
+}
+
+/* ---- Modal + lead form ---- */
+function openModal(id){
+  const l = state.all.find(x => String(x.id) === String(id));
+  if (!l) return;
+  state.current = l;
+  document.getElementById('m-img').src = l.photo || '';
+  document.getElementById('m-img').alt = l.address || '';
+  document.getElementById('m-price').textContent = fmtPrice(l.price);
+  document.getElementById('m-prop').textContent =
+    (l.address ? l.address + ' · ' : '') + (l.city || '') + (l.state ? ', ' + l.state : '');
+  document.getElementById('m-specs').innerHTML =
+    `<span><b>${l.beds||'—'}</b> bd</span><span><b>${formatBaths(l.baths)}</b> ba</span>` +
+    `<span><b>${l.sqft?Number(l.sqft).toLocaleString():'—'}</b> sqft</span>` +
+    (l.mlsId ? `<span>MLS# ${escapeHtml(l.mlsId)}</span>` : '');
+  resetFormStatus();
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function resetFormStatus(){
+  const s = document.getElementById('formStatus');
+  s.className = 'form-status'; s.textContent = '';
+  document.getElementById('lf-submit').disabled = false;
+  document.getElementById('lf-submit').textContent = 'Connect Me With the Agent';
+}
+function showStatus(type, msg){
+  const s = document.getElementById('formStatus');
+  s.className = 'form-status show ' + type; s.textContent = msg;
+}
+
+async function submitLead(e){
+  e.preventDefault();
+  const l = state.current; if (!l) return;
+  const name = document.getElementById('lf-name').value.trim();
+  const email = document.getElementById('lf-email').value.trim();
+  const phone = document.getElementById('lf-phone').value.trim();
+  const message = document.getElementById('lf-msg').value.trim();
+
+  if (!name || !email) { showStatus('error', 'Please enter your name and email.'); return; }
+
+  const propLine = `${l.address}, ${l.city}, ${l.state||'TN'} ${l.zip||''}`.trim();
+  const subject = `STR Listing Inquiry — ${propLine} (${fmtPrice(l.price)})`;
+  const bodyLines = [
+    'New property inquiry from the Smoky Mountain STR Listings page:',
+    '',
+    `Property: ${propLine}`,
+    `Price: ${fmtPrice(l.price)}`,
+    `Beds/Baths: ${l.beds} bd / ${formatBaths(l.baths)} ba`,
+    l.mlsId ? `MLS#: ${l.mlsId}` : '',
+    l.brokerage ? `Listed by: ${l.brokerage}` : '',
+    '',
+    '--- Lead ---',
+    `Name: ${name}`,
+    `Email: ${email}`,
+    `Phone: ${phone || '(not provided)'}`,
+    `Message: ${message || '(none)'}`
+  ].filter(Boolean);
+  const body = bodyLines.join('\n');
+
+  const btn = document.getElementById('lf-submit');
+  btn.disabled = true; btn.textContent = 'Sending…';
+
+  // --- Web3Forms (seamless, no backend) ---
+  if (CONFIG.leadMode === 'web3forms' && CONFIG.web3formsKey) {
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          access_key: CONFIG.web3formsKey,
+          subject, from_name: 'Haven STR Listings Page',
+          name, email, phone, message,
+          property: propLine, price: fmtPrice(l.price), mls: l.mlsId || '',
+          brokerage: l.brokerage || ''
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showStatus('success', "Thanks! We've received your inquiry and will connect you with the listing agent shortly.");
+        btn.textContent = 'Sent ✓';
+        document.getElementById('leadForm').reset();
+      } else {
+        throw new Error(data.message || 'submit failed');
+      }
+    } catch (err) {
+      console.error('[Haven] web3forms failed:', err);
+      fallbackMailto(subject, body);
+      showStatus('success', 'Opening your email app to finish sending your inquiry…');
+      btn.disabled = false; btn.textContent = 'Connect Me With the Agent';
+    }
+    return;
+  }
+
+  // --- Mailto fallback (zero setup) ---
+  fallbackMailto(subject, body);
+  showStatus('success', "Opening your email app so you can send your inquiry to our team. Hit send and we'll take it from there!");
+  btn.disabled = false; btn.textContent = 'Connect Me With the Agent';
+}
+
+function fallbackMailto(subject, body){
+  const url = 'mailto:' + encodeURIComponent(CONFIG.leadEmail) +
+    '?subject=' + encodeURIComponent(subject) +
+    '&body=' + encodeURIComponent(body);
+  window.location.href = url;
+}
+
+/* ---- Wire up controls ---- */
+function initControls(){
+  document.getElementById('cityChips').addEventListener('click', e => {
+    const chip = e.target.closest('.chip'); if (!chip) return;
+    const city = chip.getAttribute('data-city');
+    const pressed = chip.getAttribute('aria-pressed') === 'true';
+    chip.setAttribute('aria-pressed', String(!pressed));
+    if (pressed) state.activeCities.delete(city); else state.activeCities.add(city);
+    render();
+  });
+  document.getElementById('minPrice').addEventListener('change', e => {
+    state.minPrice = Math.max(CONFIG.minPrice, Number(e.target.value)); render();
+  });
+  document.getElementById('bedsFilter').addEventListener('change', e => {
+    state.minBeds = Number(e.target.value); render();
+  });
+  document.getElementById('sortBy').addEventListener('change', e => {
+    state.sort = e.target.value; render();
+  });
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  document.getElementById('modalOverlay').addEventListener('click', e => {
+    if (e.target.id === 'modalOverlay') closeModal();
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+  document.getElementById('leadForm').addEventListener('submit', submitLead);
+  document.getElementById('year').textContent = new Date().getFullYear();
+}
+
+/* ---- Boot ---- */
+initControls();
+sync(true);
+setInterval(() => sync(false), CONFIG.syncIntervalMs);
+</script>
+</body>
+</html>
