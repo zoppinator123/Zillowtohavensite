@@ -60,10 +60,10 @@ Association of Realtors IDX resellers. The page maps the feed's fields
 automatically and filters to your three cities + `$700K+`.
 
 > **Production security note:** browser-side code can expose your API key.
-> For a public launch, put your key behind a tiny serverless proxy (Cloudflare
-> Worker, Netlify/Vercel function, etc.) and point `customFeedUrl` at it
-> instead — see Option B. The bundled `simplyrets`/`simplyrets` demo
-> credentials are SimplyRETS' public sandbox and are safe to ship for testing.
+> For a public launch, put your key behind the included secure proxy — see
+> **[`proxy/`](proxy/README.md)** — and point `customFeedUrl` at it instead
+> (Option B). The bundled `simplyrets`/`simplyrets` demo credentials are
+> SimplyRETS' public sandbox and are safe to ship for testing.
 
 ### Option B — Your own JSON feed / proxy
 ```js
