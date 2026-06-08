@@ -45,6 +45,16 @@ blends with the main site.
 Open `index.html`, scroll to the **`CONFIG`** block near the bottom (clearly
 marked), and set `dataSource`.
 
+### Option A0 — Zillow via RapidAPI (fastest launch, no broker)
+```js
+dataSource: 'zillow',
+zillow: { proxyUrl: 'https://your-proxy-url', homeType: 'Houses', statusType: 'ForSale' },
+```
+Go live in an afternoon with no MLS approval, using a third-party Zillow data
+API behind the secure proxy. Note the ToS/copyright trade-off and full setup in
+**[`proxy/README.md`](proxy/README.md#fast-path--zillow-via-rapidapi)**. Best
+used as a bridge while you set up a clean MLS/Bridge feed.
+
 ### Option A — SimplyRETS / RESO IDX (most TN IDX providers)
 ```js
 dataSource: 'simplyrets',

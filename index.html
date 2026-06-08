@@ -449,6 +449,9 @@ const CONFIG = {
      dataSource options:
        'sample'      → built-in Smoky Mountain demo listings (default,
                        so the page looks right with zero setup).
+       'zillow'      → live Zillow data via a RapidAPI Zillow provider,
+                       called THROUGH your secure proxy (recommended fast
+                       launch). Set zillow.proxyUrl below. See proxy/README.
        'simplyrets'  → live MLS/IDX via SimplyRETS-style REST API
                        (RESO). Works with SimplyRETS and most TN IDX
                        resellers. Set credentials below.
@@ -456,6 +459,19 @@ const CONFIG = {
                        IDX-to-JSON proxy). Set customFeedUrl below.
      ----------------------------------------------------------------- */
   dataSource: 'sample',
+
+  // --- Zillow via RapidAPI (used when dataSource==='zillow') ---------
+  // The page calls your proxy ONCE PER CITY; the proxy adds your secret
+  // RapidAPI key server-side and forwards to the Zillow provider. Built for
+  // the common "zillow-com1" provider's /propertyExtendedSearch endpoint
+  // (response shape: { props: [...] }). Set up the proxy first — see
+  // proxy/README.md ("Zillow via RapidAPI"). NEVER put the RapidAPI key here;
+  // it lives in the proxy's secrets.
+  zillow: {
+    proxyUrl: '',                 // <-- your proxy URL, e.g. https://haven-listings.you.workers.dev
+    homeType: 'Houses',           // Zillow home_type filter
+    statusType: 'ForSale'         // Zillow status_type filter
+  },
 
   // --- SimplyRETS / RESO IDX settings (used when dataSource==='simplyrets')
   // NOTE: For production, proxy this through a tiny serverless function so
@@ -631,10 +647,67 @@ function normalizeSimplyRets(r){
   };
 }
 
+/* ---- Normalize a Zillow (RapidAPI "zillow-com1") record into our shape ----
+   Response items come from /propertyExtendedSearch as `props[]`. Zillow gives
+   a single address string and no listing remarks, so we parse city/zip from it
+   and link out to the original Zillow listing (we do not rehost the listing). */
+function normalizeZillow(p, queriedCity){
+  const full = p.address || '';
+  const parts = full.split(',').map(s => s.trim());
+  const street = parts[0] || full;
+  const city = parts[1] || queriedCity || '';
+  const stateZip = (parts[2] || '').split(' ').filter(Boolean); // ["TN","37738"]
+  const detail = p.detailUrl || (p.zpid ? '/homedetails/' + p.zpid + '_zpid/' : '');
+  const daysOn = (p.daysOnZillow != null && p.daysOnZillow >= 0) ? p.daysOnZillow : 0;
+  const t = new Date(); t.setDate(t.getDate() - daysOn);
+  return {
+    id: p.zpid || full || Math.random().toString(36).slice(2),
+    mlsId: '',
+    price: p.price || p.unformattedPrice || 0,
+    address: street,
+    city,
+    state: stateZip[0] || 'TN',
+    zip: stateZip[1] || '',
+    beds: p.bedrooms || 0,
+    baths: p.bathrooms || 0,
+    sqft: p.livingArea || p.lotAreaValue || 0,
+    type: (p.propertyType || 'House').replace(/_/g, ' '),
+    listDate: t.toISOString(),
+    photo: p.imgSrc || '',
+    photos: p.imgSrc ? [p.imgSrc] : [],
+    estRevenue: null,
+    description: '',
+    agentName: 'Listing Agent',
+    brokerage: p.brokerName || '',
+    url: detail ? (detail.startsWith('http') ? detail : 'https://www.zillow.com' + detail) : ''
+  };
+}
+
 /* ---- Fetch listings from the configured source ---- */
 async function fetchListings(){
   if (CONFIG.dataSource === 'sample') {
     return SAMPLE_LISTINGS.slice();
+  }
+  if (CONFIG.dataSource === 'zillow') {
+    const z = CONFIG.zillow;
+    if (!z.proxyUrl) throw new Error('zillow.proxyUrl not set');
+    // One call per city (the Zillow provider takes a single location per request).
+    const results = await Promise.all(CONFIG.cities.map(async city => {
+      const qs = new URLSearchParams({
+        location: city + ', TN',
+        status_type: z.statusType || 'ForSale',
+        home_type: z.homeType || 'Houses',
+        minPrice: String(CONFIG.minPrice)
+      });
+      const res = await fetch(z.proxyUrl + (z.proxyUrl.includes('?') ? '&' : '?') + qs.toString());
+      if (!res.ok) throw new Error('Zillow feed error ' + res.status);
+      const data = await res.json();
+      const props = data.props || data.results || (Array.isArray(data) ? data : []);
+      return props.map(p => normalizeZillow(p, city));
+    }));
+    // Flatten + de-duplicate by id (zpid).
+    const seen = new Set();
+    return results.flat().filter(l => l.id && !seen.has(l.id) && seen.add(l.id));
   }
   if (CONFIG.dataSource === 'simplyrets') {
     const c = CONFIG.simplyrets;
@@ -718,6 +791,7 @@ function render(){
         </div>
         ${l.estRevenue ? `<div class="revenue">Est. annual STR revenue: <b>${fmtPrice(l.estRevenue)}</b></div>` : ''}
         ${l.brokerage ? `<div class="agent">Listed by ${escapeHtml(l.brokerage)}</div>` : ''}
+        ${l.url ? `<div class="agent"><a href="${escapeAttr(l.url)}" target="_blank" rel="noopener nofollow" style="color:#888;text-decoration:underline;">View original listing on Zillow ↗</a></div>` : ''}
         <div class="actions">
           <button class="btn" data-connect="${escapeAttr(l.id)}">Connect With Us</button>
         </div>
@@ -776,7 +850,8 @@ function openModal(id){
   document.getElementById('m-specs').innerHTML =
     `<span><b>${l.beds||'—'}</b> bd</span><span><b>${formatBaths(l.baths)}</b> ba</span>` +
     `<span><b>${l.sqft?Number(l.sqft).toLocaleString():'—'}</b> sqft</span>` +
-    (l.mlsId ? `<span>MLS# ${escapeHtml(l.mlsId)}</span>` : '');
+    (l.mlsId ? `<span>MLS# ${escapeHtml(l.mlsId)}</span>` : '') +
+    (l.url ? `<span><a href="${escapeAttr(l.url)}" target="_blank" rel="noopener nofollow">View on Zillow ↗</a></span>` : '');
   resetFormStatus();
   document.getElementById('modalOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';

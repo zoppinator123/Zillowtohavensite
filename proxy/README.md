@@ -8,9 +8,53 @@ visible in the page source.
 `listings-proxy.js` is a **Cloudflare Worker** — free, no credit card, and it
 works no matter where `index.html` is hosted (WordPress, etc.).
 
+> The proxy is the same whether your data comes from an MLS/IDX vendor or from a
+> RapidAPI Zillow provider — it just holds the secret key and forwards requests.
+> **Fastest launch → jump to ["Zillow via RapidAPI"](#fast-path--zillow-via-rapidapi) below.**
+> **Cleanest long-term → the MLS/IDX steps that follow.**
+
 ---
 
-## Step 0 — Get MLS data access first
+## Fast path — Zillow via RapidAPI
+
+Go live in an afternoon with no broker and no MLS approval. You pay a third-party
+provider (~$30–75/mo) that scrapes Zillow for you and returns JSON; the proxy
+keeps your key secret.
+
+> ⚠️ **Know the trade-off:** you'll be republishing Zillow-origin data on a public
+> commercial page, which carries Zillow ToS / photo-copyright risk. The page
+> de-risks by linking out to each original Zillow listing rather than claiming
+> it. Treat this as a **bridge** while you set up a clean MLS/Bridge feed.
+
+1. Create a [RapidAPI](https://rapidapi.com) account and subscribe to a Zillow
+   data API. The page is built for the common **"Zillow.com API" (`zillow-com1`)**
+   provider and its `/propertyExtendedSearch` endpoint. Copy your **RapidAPI key**.
+2. Deploy the worker (Step 1 below), then set these variables (Step 2):
+
+   | Variable | Value |
+   |---|---|
+   | `UPSTREAM_URL` | `https://zillow-com1.p.rapidapi.com/propertyExtendedSearch` |
+   | `ALLOWED_ORIGIN` | `https://havenvacationrentals.com` |
+   | `AUTH_MODE` | `header` |
+   | `AUTH_HEADER_NAME` | `X-RapidAPI-Key` |
+   | `AUTH_TOKEN` | *(your RapidAPI key — Encrypt)* |
+   | `EXTRA_HEADERS` | `{"X-RapidAPI-Host":"zillow-com1.p.rapidapi.com"}` |
+
+3. In `index.html` → `CONFIG`:
+   ```js
+   dataSource: 'zillow',
+   zillow: { proxyUrl: 'https://haven-listings.yourname.workers.dev', homeType: 'Houses', statusType: 'ForSale' },
+   ```
+   The page calls the proxy once per city (Sevierville / Gatlinburg / Pigeon
+   Forge), filters to `$700K+`, de-dupes, and renders. Done.
+
+> Using a *different* RapidAPI Zillow provider? Their JSON field names may differ
+> from `zillow-com1`'s `props[]` shape — send me a sample response and I'll adjust
+> the `normalizeZillow()` mapping in `index.html`.
+
+---
+
+## Step 0 — Get MLS data access first  *(cleaner long-term route)*
 
 Our local MLS is **Great Smoky Mountains MLS (GSMMLS / GSMAR)**. To show its
 listings you need a paid **IDX data license**, sponsored by a licensed

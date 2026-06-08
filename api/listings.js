@@ -76,6 +76,12 @@ export default async function handler(req, res) {
     upstream.searchParams.set(process.env.AUTH_QUERY_NAME || 'apikey', process.env.AUTH_TOKEN || '');
   }
 
+  // Optional extra static headers (e.g. RapidAPI needs X-RapidAPI-Host too).
+  // EXTRA_HEADERS is JSON, e.g. {"X-RapidAPI-Host":"zillow-com1.p.rapidapi.com"}
+  if (process.env.EXTRA_HEADERS) {
+    try { Object.assign(headers, JSON.parse(process.env.EXTRA_HEADERS)); } catch (_) {}
+  }
+
   try {
     const upstreamRes = await fetch(upstream.toString(), { headers });
     const body = await upstreamRes.text();
