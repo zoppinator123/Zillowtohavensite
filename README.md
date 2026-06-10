@@ -48,7 +48,7 @@ marked), and set `dataSource`.
 ### Option A0 — Zillow via RapidAPI (fastest launch, no broker)
 ```js
 dataSource: 'zillow',
-zillow: { proxyUrl: 'https://your-proxy-url', homeType: 'Houses', statusType: 'ForSale' },
+zillow: { proxyUrl: 'https://your-proxy-url', provider: 'zllw-working-api' },
 ```
 Go live in an afternoon with no MLS approval, using a third-party Zillow data
 API behind the secure proxy. Note the ToS/copyright trade-off and full setup in

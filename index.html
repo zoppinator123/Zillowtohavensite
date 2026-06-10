@@ -461,16 +461,16 @@ const CONFIG = {
   dataSource: 'sample',
 
   // --- Zillow via RapidAPI (used when dataSource==='zillow') ---------
-  // The page calls your proxy ONCE PER CITY; the proxy adds your secret
-  // RapidAPI key server-side and forwards to the Zillow provider. Built for
-  // the common "zillow-com1" provider's /propertyExtendedSearch endpoint
-  // (response shape: { props: [...] }). Set up the proxy first — see
-  // proxy/README.md ("Zillow via RapidAPI"). NEVER put the RapidAPI key here;
-  // it lives in the proxy's secrets.
+  // The page calls your proxy; the proxy adds your secret RapidAPI key
+  // server-side and forwards to the Zillow provider. Built for the
+  // "Zillow Working API" (zllw-working-api.p.rapidapi.com) search endpoint:
+  // the page sends ?url=<zillow search url>&page=1 and reads the
+  // searchResults array. Also still supports the older "zillow-com1"
+  // provider (set provider:'zillow-com1'). See proxy/README.md.
+  // NEVER put the RapidAPI key here; it lives in the proxy's secrets.
   zillow: {
-    proxyUrl: '',                 // <-- your proxy URL, e.g. https://haven-listings.you.workers.dev
-    homeType: 'Houses',           // Zillow home_type filter
-    statusType: 'ForSale'         // Zillow status_type filter
+    proxyUrl: '',                    // <-- your proxy URL, e.g. https://haven-listings.you.workers.dev
+    provider: 'zllw-working-api'     // 'zllw-working-api' | 'zillow-com1'
   },
 
   // --- SimplyRETS / RESO IDX settings (used when dataSource==='simplyrets')
@@ -647,40 +647,87 @@ function normalizeSimplyRets(r){
   };
 }
 
-/* ---- Normalize a Zillow (RapidAPI "zillow-com1") record into our shape ----
-   Response items come from /propertyExtendedSearch as `props[]`. Zillow gives
-   a single address string and no listing remarks, so we parse city/zip from it
-   and link out to the original Zillow listing (we do not rehost the listing). */
-function normalizeZillow(p, queriedCity){
-  const full = p.address || '';
-  const parts = full.split(',').map(s => s.trim());
-  const street = parts[0] || full;
-  const city = parts[1] || queriedCity || '';
-  const stateZip = (parts[2] || '').split(' ').filter(Boolean); // ["TN","37738"]
-  const detail = p.detailUrl || (p.zpid ? '/homedetails/' + p.zpid + '_zpid/' : '');
-  const daysOn = (p.daysOnZillow != null && p.daysOnZillow >= 0) ? p.daysOnZillow : 0;
-  const t = new Date(); t.setDate(t.getDate() - daysOn);
+/* ---- Normalize a Zillow record (RapidAPI providers) into our shape ----
+   Shape-tolerant: handles the "Zillow Working API" (zllw-working-api) search
+   results — items wrapped as { property: {...} } with address/price as
+   objects — AND the older "zillow-com1" flat props[] shape. Zillow feeds have
+   no listing remarks; we link out to the original Zillow listing rather than
+   rehosting it. */
+function normalizeZillow(item, queriedCity){
+  const p = item.property || item;
+
+  // Address: object ({streetAddress, city, state, zipcode}) or single string.
+  let street = '', city = queriedCity || '', st = 'TN', zip = '';
+  const a = p.address;
+  if (a && typeof a === 'object') {
+    street = a.streetAddress || a.street || '';
+    city = a.city || city; st = a.state || st; zip = a.zipcode || a.postalCode || a.zip || '';
+  } else {
+    const parts = String(a || '').split(',').map(s => s.trim());
+    street = parts[0] || '';
+    if (parts[1]) city = parts[1];
+    const stateZip = (parts[2] || '').split(' ').filter(Boolean);
+    st = stateZip[0] || st; zip = stateZip[1] || '';
+  }
+
+  // Price: number or { value }.
+  const price = (p.price && typeof p.price === 'object')
+    ? (p.price.value || p.price.amount || 0)
+    : (p.price || p.unformattedPrice || 0);
+
+  // Photo: try the common media layouts, then flat fields.
+  const media = p.media || {};
+  const photoLinks = media.propertyPhotoLinks || {};
+  const allPhotos = (media.allPropertyPhotos && (media.allPropertyPhotos.highResolution || media.allPropertyPhotos.mediumSize)) || [];
+  const photo = p.imgSrc || photoLinks.highResolutionLink || photoLinks.mediumSizeLink
+    || allPhotos[0] || (Array.isArray(p.photos) && p.photos[0]) || '';
+
+  // List date: explicit timestamp if present (epoch ms or ISO), else daysOnZillow.
+  let listDate;
+  const ts = p.listingDateTimeOnZillow || p.datePosted || p.listDate;
+  if (ts) {
+    const d = typeof ts === 'number' ? new Date(ts) : new Date(String(ts));
+    if (!isNaN(d)) listDate = d.toISOString();
+  }
+  if (!listDate) {
+    const daysOn = (p.daysOnZillow != null && p.daysOnZillow >= 0) ? p.daysOnZillow : 0;
+    const t = new Date(); t.setDate(t.getDate() - daysOn);
+    listDate = t.toISOString();
+  }
+
+  // Link to the original Zillow listing.
+  const detail = p.hdpUrl || p.detailUrl || p.url || (p.zpid ? '/homedetails/' + p.zpid + '_zpid/' : '');
+  const attribution = p.attributionInfo || {};
+
   return {
-    id: p.zpid || full || Math.random().toString(36).slice(2),
-    mlsId: '',
-    price: p.price || p.unformattedPrice || 0,
+    id: p.zpid || street || Math.random().toString(36).slice(2),
+    mlsId: attribution.mlsId || '',
+    price,
     address: street,
     city,
-    state: stateZip[0] || 'TN',
-    zip: stateZip[1] || '',
-    beds: p.bedrooms || 0,
-    baths: p.bathrooms || 0,
-    sqft: p.livingArea || p.lotAreaValue || 0,
-    type: (p.propertyType || 'House').replace(/_/g, ' '),
-    listDate: t.toISOString(),
-    photo: p.imgSrc || '',
-    photos: p.imgSrc ? [p.imgSrc] : [],
+    state: st,
+    zip,
+    beds: p.bedrooms || p.beds || 0,
+    baths: p.bathrooms || p.baths || 0,
+    sqft: p.livingArea || p.livingAreaValue || p.lotAreaValue || 0,
+    type: String(p.propertyType || p.homeType || 'House').replace(/_/g, ' '),
+    listDate,
+    photo,
+    photos: photo ? [photo] : [],
     estRevenue: null,
     description: '',
-    agentName: 'Listing Agent',
-    brokerage: p.brokerName || '',
+    agentName: attribution.agentName || 'Listing Agent',
+    brokerage: p.brokerageName || p.brokerName || attribution.brokerName || '',
     url: detail ? (detail.startsWith('http') ? detail : 'https://www.zillow.com' + detail) : ''
   };
+}
+
+/* Zillow search URL for a city + min price (Zillow's clean URL filter syntax,
+   e.g. https://www.zillow.com/sevierville-tn/houses/700000-_price/ ). The
+   zllw-working-api search endpoint takes this URL as its `url` parameter. */
+function zillowSearchUrl(city, minPrice){
+  const slug = city.toLowerCase().replace(/\s+/g, '-') + '-tn';
+  return 'https://www.zillow.com/' + slug + '/houses/' + minPrice + '-_price/';
 }
 
 /* ---- Fetch listings from the configured source ---- */
@@ -691,18 +738,24 @@ async function fetchListings(){
   if (CONFIG.dataSource === 'zillow') {
     const z = CONFIG.zillow;
     if (!z.proxyUrl) throw new Error('zillow.proxyUrl not set');
-    // One call per city (the Zillow provider takes a single location per request).
+    // One call per city (Zillow providers take a single location per request).
     const results = await Promise.all(CONFIG.cities.map(async city => {
-      const qs = new URLSearchParams({
-        location: city + ', TN',
-        status_type: z.statusType || 'ForSale',
-        home_type: z.homeType || 'Houses',
-        minPrice: String(CONFIG.minPrice)
-      });
+      const qs = (z.provider === 'zillow-com1')
+        ? new URLSearchParams({
+            location: city + ', TN',
+            status_type: 'ForSale',
+            home_type: 'Houses',
+            minPrice: String(CONFIG.minPrice)
+          })
+        : new URLSearchParams({
+            url: zillowSearchUrl(city, CONFIG.minPrice),
+            page: '1'
+          });
       const res = await fetch(z.proxyUrl + (z.proxyUrl.includes('?') ? '&' : '?') + qs.toString());
       if (!res.ok) throw new Error('Zillow feed error ' + res.status);
       const data = await res.json();
-      const props = data.props || data.results || (Array.isArray(data) ? data : []);
+      const props = data.searchResults || data.props || data.results
+        || (Array.isArray(data) ? data : []);
       return props.map(p => normalizeZillow(p, city));
     }));
     // Flatten + de-duplicate by id (zpid).

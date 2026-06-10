@@ -26,31 +26,37 @@ keeps your key secret.
 > de-risks by linking out to each original Zillow listing rather than claiming
 > it. Treat this as a **bridge** while you set up a clean MLS/Bridge feed.
 
-1. Create a [RapidAPI](https://rapidapi.com) account and subscribe to a Zillow
-   data API. The page is built for the common **"Zillow.com API" (`zillow-com1`)**
-   provider and its `/propertyExtendedSearch` endpoint. Copy your **RapidAPI key**.
-2. Deploy the worker (Step 1 below), then set these variables (Step 2):
+1. The page is built for the **"Zillow Working API"** (`zllw-working-api`) on
+   [RapidAPI](https://rapidapi.com/oneapiproject/api/zillow-working-api).
+   Subscribe and copy your **RapidAPI key**. (The older `zillow-com1` provider
+   is also supported — set `provider: 'zillow-com1'` in the page CONFIG.)
+2. In the RapidAPI playground sidebar, find the **search** endpoint (the one
+   that takes a Zillow **search URL** + `page` and returns a `searchResults`
+   array — *not* the per-property `/pro/byzpid` one). Note its exact path.
+3. Deploy the worker (Step 1 below), then set these variables (Step 2):
 
    | Variable | Value |
    |---|---|
-   | `UPSTREAM_URL` | `https://zillow-com1.p.rapidapi.com/propertyExtendedSearch` |
+   | `UPSTREAM_URL` | `https://zllw-working-api.p.rapidapi.com/search/byurl` *(use the exact search path from the playground)* |
    | `ALLOWED_ORIGIN` | `https://havenvacationrentals.com` |
    | `AUTH_MODE` | `header` |
    | `AUTH_HEADER_NAME` | `X-RapidAPI-Key` |
    | `AUTH_TOKEN` | *(your RapidAPI key — Encrypt)* |
-   | `EXTRA_HEADERS` | `{"X-RapidAPI-Host":"zillow-com1.p.rapidapi.com"}` |
+   | `EXTRA_HEADERS` | `{"X-RapidAPI-Host":"zllw-working-api.p.rapidapi.com"}` |
 
-3. In `index.html` → `CONFIG`:
+4. In `index.html` → `CONFIG`:
    ```js
    dataSource: 'zillow',
-   zillow: { proxyUrl: 'https://haven-listings.yourname.workers.dev', homeType: 'Houses', statusType: 'ForSale' },
+   zillow: { proxyUrl: 'https://haven-listings.yourname.workers.dev', provider: 'zllw-working-api' },
    ```
-   The page calls the proxy once per city (Sevierville / Gatlinburg / Pigeon
-   Forge), filters to `$700K+`, de-dupes, and renders. Done.
+   For each city the page asks the provider for Zillow's own filtered search
+   (e.g. `https://www.zillow.com/sevierville-tn/houses/700000-_price/`), then
+   filters to `$700K+`, de-dupes by zpid, and renders. Done.
 
-> Using a *different* RapidAPI Zillow provider? Their JSON field names may differ
-> from `zillow-com1`'s `props[]` shape — send me a sample response and I'll adjust
-> the `normalizeZillow()` mapping in `index.html`.
+> The field mapping (`normalizeZillow()` in `index.html`) is shape-tolerant for
+> this provider's `searchResults[].property` format and `zillow-com1`'s flat
+> `props[]` format. If a different provider/endpoint returns something else,
+> paste a sample JSON response into Claude and the mapping gets adjusted.
 
 ---
 
