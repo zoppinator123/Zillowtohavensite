@@ -709,7 +709,7 @@ function normalizeZillow(item, queriedCity){
     zip,
     beds: p.bedrooms || p.beds || 0,
     baths: p.bathrooms || p.baths || 0,
-    sqft: p.livingArea || p.livingAreaValue || p.lotAreaValue || 0,
+    sqft: p.area || p.livingArea || p.livingAreaValue || p.lotAreaValue || 0,
     type: String(p.propertyType || p.homeType || 'House').replace(/_/g, ' '),
     listDate,
     photo,
@@ -754,7 +754,7 @@ async function fetchListings(){
       const res = await fetch(z.proxyUrl + (z.proxyUrl.includes('?') ? '&' : '?') + qs.toString());
       if (!res.ok) throw new Error('Zillow feed error ' + res.status);
       const data = await res.json();
-      const props = data.searchResults || data.props || data.results
+      const props = data.Results || data.searchResults || data.props || data.results
         || (Array.isArray(data) ? data : []);
       return props.map(p => normalizeZillow(p, city));
     }));
