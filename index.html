@@ -671,9 +671,10 @@ function normalizeZillow(item, queriedCity){
   }
 
   // Price: number or { value }.
-  const price = (p.price && typeof p.price === 'object')
+  let price = (p.price && typeof p.price === 'object')
     ? (p.price.value || p.price.amount || 0)
-    : (p.price || p.unformattedPrice || 0);
+    : (p.unformattedPrice != null ? p.unformattedPrice : p.price || 0);
+  if (typeof price === 'string') price = Number(price.replace(/[^0-9.]/g, '')) || 0;
 
   // Photo: try the common media layouts, then flat fields.
   const media = p.media || {};
