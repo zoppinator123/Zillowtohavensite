@@ -198,13 +198,14 @@
   /* ---------- Modal ---------- */
   .modal-overlay {
     position: fixed; inset: 0; background: rgba(20,20,20,.6); z-index: 100;
-    display: none; align-items: flex-start; justify-content: center; padding: 30px 16px; overflow-y: auto;
+    display: none; align-items: center; justify-content: center; padding: 30px 16px; overflow-y: auto;
   }
   .modal-overlay.open { display: flex; }
   .modal {
     background:#fff; border-radius: 16px; max-width: 920px; width: 100%;
     box-shadow: 0 24px 60px rgba(0,0,0,.3); overflow: hidden;
     display: grid; grid-template-columns: 1fr 1fr; animation: popin .2s ease;
+    margin: auto;
   }
   @keyframes popin { from { opacity:0; transform: translateY(12px);} to {opacity:1; transform:none;} }
   .modal .m-photo { background:#ececec; min-height: 280px; position: relative; }
@@ -907,7 +908,9 @@ function openModal(id){
     (l.mlsId ? `<span>MLS# ${escapeHtml(l.mlsId)}</span>` : '') +
     (l.url ? `<span><a href="${escapeAttr(l.url)}" target="_blank" rel="noopener nofollow">View on Zillow ↗</a></span>` : '');
   resetFormStatus();
-  document.getElementById('modalOverlay').classList.add('open');
+  const overlay = document.getElementById('modalOverlay');
+  overlay.classList.add('open');
+  overlay.scrollTop = 0;
   document.body.style.overflow = 'hidden';
 }
 function closeModal(){
