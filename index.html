@@ -1033,6 +1033,7 @@ function initControls(){
 initControls();
 sync(true);
     setInterval(() => sync(false), CONFIG.syncIntervalMs);
+     (function(){var rh=function(){try{var h=Math.max(document.body.scrollHeight,document.documentElement.scrollHeight,document.body.offsetHeight,document.documentElement.offsetHeight);parent.postMessage({type:'haven-listings-height',height:h},'*');}catch(e){}};window.addEventListener('load',rh);window.addEventListener('resize',rh);setInterval(rh,1000);rh();})();
 </script>
 </body>
 </html>
