@@ -201,12 +201,21 @@
     display: none; align-items: center; justify-content: center; padding: 30px 16px; overflow-y: auto;
   }
   .modal-overlay.open { display: flex; }
+  /* When the page is embedded in an auto-height iframe (WordPress embed),
+     position:fixed spans the WHOLE tall iframe, so a "centered" modal lands
+     nowhere near the visible area. Switch to absolute positioning and place
+     the modal at the clicked card's position (margin-top set in JS). */
+  body.in-iframe .modal-overlay {
+    position: absolute; top: 0; left: 0; right: 0; bottom: auto;
+    align-items: flex-start; overflow-y: visible;
+  }
   .modal {
     background:#fff; border-radius: 16px; max-width: 920px; width: 100%;
     box-shadow: 0 24px 60px rgba(0,0,0,.3); overflow: hidden;
     display: grid; grid-template-columns: 1fr 1fr; animation: popin .2s ease;
     margin: auto;
   }
+  body.in-iframe .modal { margin: 0 auto 40px; }
   @keyframes popin { from { opacity:0; transform: translateY(12px);} to {opacity:1; transform:none;} }
   .modal .m-photo { background:#ececec; min-height: 280px; position: relative; }
   .modal .m-photo img { width:100%; height:100%; object-fit: cover; position:absolute; inset:0; }
@@ -684,6 +693,9 @@ function normalizeZillow(item, queriedCity){
   const photo = p.imgSrc || photoLinks.highResolutionLink || photoLinks.mediumSizeLink
     || allPhotos[0] || (Array.isArray(p.photos) && p.photos[0]) || '';
 
+  // Some providers nest the detailed fields under hdpData.homeInfo.
+  const info = (p.hdpData && p.hdpData.homeInfo) || {};
+
   // List date: explicit timestamp if present (epoch ms or ISO), else daysOnZillow.
   let listDate;
   const ts = p.listingDateTimeOnZillow || p.datePosted || p.listDate;
@@ -692,7 +704,8 @@ function normalizeZillow(item, queriedCity){
     if (!isNaN(d)) listDate = d.toISOString();
   }
   if (!listDate) {
-    const daysOn = (p.daysOnZillow != null && p.daysOnZillow >= 0) ? p.daysOnZillow : 0;
+    const rawDays = (p.daysOnZillow != null) ? p.daysOnZillow : info.daysOnZillow;
+    const daysOn = (rawDays != null && rawDays >= 0) ? rawDays : 0;
     const t = new Date(); t.setDate(t.getDate() - daysOn);
     listDate = t.toISOString();
   }
@@ -711,8 +724,8 @@ function normalizeZillow(item, queriedCity){
     zip,
     beds: p.bedrooms || p.beds || 0,
     baths: p.bathrooms || p.baths || 0,
-    sqft: p.area || p.livingArea || p.livingAreaValue || p.lotAreaValue || 0,
-    type: String(p.propertyType || p.homeType || 'House').replace(/_/g, ' '),
+    sqft: p.area || p.livingArea || p.livingAreaValue || info.livingArea || p.lotAreaValue || 0,
+    type: String(p.propertyType || p.homeType || info.homeType || 'House').replace(/_/g, ' '),
     listDate,
     photo,
     photos: photo ? [photo] : [],
@@ -855,7 +868,7 @@ function render(){
   `).join('');
 
   grid.querySelectorAll('[data-connect]').forEach(btn => {
-    btn.addEventListener('click', () => openModal(btn.getAttribute('data-connect')));
+    btn.addEventListener('click', () => openModal(btn.getAttribute('data-connect'), btn));
   });
 }
 
@@ -893,7 +906,10 @@ async function sync(initial){
 }
 
 /* ---- Modal + lead form ---- */
-function openModal(id){
+const IN_IFRAME = (function(){ try { return window.self !== window.top; } catch (e) { return true; } })();
+if (IN_IFRAME) document.body.classList.add('in-iframe');
+
+function openModal(id, anchorEl){
   const l = state.all.find(x => String(x.id) === String(id));
   if (!l) return;
   state.current = l;
@@ -911,10 +927,25 @@ function openModal(id){
   const overlay = document.getElementById('modalOverlay');
   overlay.classList.add('open');
   overlay.scrollTop = 0;
-  document.body.style.overflow = 'hidden';
+  if (IN_IFRAME) {
+    // Cover the full document and drop the modal right where the user clicked,
+    // since position:fixed can't track the visible area inside a tall iframe.
+    overlay.style.height = document.documentElement.scrollHeight + 'px';
+    const modalEl = overlay.querySelector('.modal');
+    if (anchorEl && modalEl) {
+      const y = anchorEl.getBoundingClientRect().top + (window.pageYOffset || document.documentElement.scrollTop || 0);
+      modalEl.style.marginTop = Math.max(24, Math.round(y - 220)) + 'px';
+    }
+  } else {
+    document.body.style.overflow = 'hidden';
+  }
 }
 function closeModal(){
-  document.getElementById('modalOverlay').classList.remove('open');
+  const overlay = document.getElementById('modalOverlay');
+  overlay.classList.remove('open');
+  overlay.style.height = '';
+  const modalEl = overlay.querySelector('.modal');
+  if (modalEl) modalEl.style.marginTop = '';
   document.body.style.overflow = '';
 }
 function resetFormStatus(){
